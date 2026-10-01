@@ -18,3 +18,58 @@ public struct LayoutEdges: OptionSet, Sendable {
     public static let vertical: LayoutEdges = [.top, .bottom]
     public static let all: LayoutEdges = [.horizontal, .vertical]
 }
+
+/// Padding is a fixed distance that ignores the safe area. To keep content inside the
+/// safe area, mount it with `addContent(_:safeArea:)` instead.
+///
+/// `HStack` and `VStack` hold the padding as a required distance on every edge. A plain
+/// `NSStackView` keeps AppKit's own behavior, where the padding across the stack's axis
+/// gives way to an element that is too large.
+@MainActor
+public extension NSStackView {
+
+    /// Sets the same padding on every edge.
+    @discardableResult
+    func padding(_ length: CGFloat) -> Self {
+        padding(.all, length)
+    }
+
+    /// Sets the padding of the given edges and keeps the other edges as they are.
+    @discardableResult
+    func padding(_ edges: LayoutEdges = .all, _ length: CGFloat = 16) -> Self {
+        var insets = edgeInsets
+        if edges.contains(.top) { insets.top = length }
+        if edges.contains(.leading) { insets.left = length }
+        if edges.contains(.bottom) { insets.bottom = length }
+        if edges.contains(.trailing) { insets.right = length }
+        edgeInsets = insets
+        return self
+    }
+
+    /// Sets one padding for the leading and trailing edges and another for the top and
+    /// bottom edges.
+    @discardableResult
+    func padding(horizontal: CGFloat, vertical: CGFloat) -> Self {
+        padding(top: vertical, leading: horizontal, bottom: vertical, trailing: horizontal)
+    }
+
+    /// Sets the padding of each edge.
+    @discardableResult
+    func padding(top: CGFloat, leading: CGFloat, bottom: CGFloat, trailing: CGFloat) -> Self {
+        // `NSStackView` treats `left` and `right` as leading and trailing.
+        edgeInsets = NSEdgeInsets(top: top, left: leading, bottom: bottom, right: trailing)
+        return self
+    }
+
+    /// Sets `length` on the given edges and `others` on the remaining edges.
+    @discardableResult
+    func padding(_ edges: LayoutEdges, _ length: CGFloat, others: CGFloat) -> Self {
+        padding(others).padding(edges, length)
+    }
+
+    /// Sets the padding of every edge.
+    @discardableResult
+    func padding(_ insets: NSDirectionalEdgeInsets) -> Self {
+        padding(top: insets.top, leading: insets.leading, bottom: insets.bottom, trailing: insets.trailing)
+    }
+}
