@@ -59,6 +59,27 @@ final class DecorationTests: XCTestCase {
         XCTAssertEqual(badgeFrame(.fill), CGRect(x: 0, y: 0, width: 70, height: 40))
     }
 
+    func testOffsetMovesADecorationFromItsAlignment() {
+        func badgeFrame(_ alignment: LayoutAlignment, _ offset: CGPoint) -> CGRect {
+            let badge = SizedView(width: 10, height: 10)
+            let column = stack().overlay(alignment: alignment, offset: offset) { badge }
+            host.place(column)
+            XCTAssertEqual(column.frame.size, CGSize(width: 70, height: 40), "An offset never resizes the view.")
+            return badge.frame
+        }
+
+        // x is positive toward the right and y toward the bottom, from where the alignment puts it.
+        XCTAssertEqual(badgeFrame(.topTrailing, CGPoint(x: 4, y: -3)), CGRect(x: 64, y: -3, width: 10, height: 10))
+        XCTAssertEqual(badgeFrame(.center, CGPoint(x: 5, y: 6)), CGRect(x: 35, y: 21, width: 10, height: 10))
+        XCTAssertEqual(badgeFrame(.bottomLeading, CGPoint(x: -2, y: 2)), CGRect(x: -2, y: 32, width: 10, height: 10))
+
+        let behind = SizedView(width: 10, height: 10)
+        let column = stack().background(alignment: .bottom, offset: CGPoint(x: 0, y: 4)) { behind }
+        host.place(column)
+        XCTAssertEqual(behind.frame, CGRect(x: 30, y: 34, width: 10, height: 10))
+        XCTAssertTrue(column.subviews.first === behind)
+    }
+
     func testOverlayOnAPlainView() {
         let badge = SizedView(width: 10, height: 10)
         let view = NSView().frame(width: 100, height: 50).overlay(alignment: .bottomTrailing) { badge }

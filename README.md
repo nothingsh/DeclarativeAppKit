@@ -148,13 +148,15 @@ let rounded = VStack { name }
     .padding(16)
     .background { roundedBox }                             // any view behind the stack
 
+// in front of a view, nudged out of its corner
 let avatar = NSImageView()
     .frame(width: 48, height: 48)
-    .overlay(alignment: .bottomTrailing) { statusDot }     // any view in front of a view
+    .overlay(alignment: .bottomTrailing, offset: CGPoint(x: 4, y: 4)) { statusDot }
 ```
 
 - A decoration is a subview pinned with constraints; no container view is inserted and there is no `ZStack`. `alignment` is `.fill` by default, or a position such as `.topTrailing`.
 - The decorated view's own content decides its size.
+- `offset` moves a decoration from where `alignment` puts it: x is positive toward the right and y toward the bottom. The value is passed to Auto Layout as it is, which reverses the horizontal direction in a right-to-left layout; adjust it yourself if that is not what you want. `.fill` takes no offset. Before macOS 14 a view clips its subviews by default, so set `.clipsToBounds(false)` on the decorated view to show an overlay that reaches outside it.
 
 ### Spacer
 

@@ -148,13 +148,15 @@ let rounded = VStack { name }
     .padding(16)
     .background { roundedBox }                             // stack 后面的任意视图
 
+// 在视图前面，并从角上向外偏移
 let avatar = NSImageView()
     .frame(width: 48, height: 48)
-    .overlay(alignment: .bottomTrailing) { statusDot }     // 视图前面的任意视图
+    .overlay(alignment: .bottomTrailing, offset: CGPoint(x: 4, y: 4)) { statusDot }
 ```
 
 - 装饰是用约束固定的子视图；不会插入容器视图，也没有 `ZStack`。`alignment` 默认为 `.fill`，也可以是 `.topTrailing` 这样的位置。
 - 被装饰视图自身的内容决定其尺寸。
+- `offset` 把装饰从 `alignment` 确定的位置移开：x 正值朝右，y 正值朝下。这个值原样交给 Auto Layout，在从右到左的布局中水平方向会反过来；如果不希望这样，请自行调整传入的值。`.fill` 不接受 offset。在 macOS 14 之前，视图默认会裁剪子视图，因此要显示伸出被装饰视图之外的 overlay，需要对被装饰视图设置 `.clipsToBounds(false)`。
 
 ### Spacer
 
