@@ -114,6 +114,80 @@ final class ScrollTests: XCTestCase {
         XCTAssertEqual(scrollView.stack.frame.height, 220)
     }
 
+    /// A scroll-wheel event as AppKit delivers it. `phase` is 0 for a plain wheel click,
+    /// 1 when a trackpad gesture begins and 2 while it continues.
+    private func wheel(dx: Int32 = 0, dy: Int32 = 0, phase: Int64 = 0) -> NSEvent {
+        let event = CGEvent(
+            scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 2, wheel1: dy, wheel2: dx, wheel3: 0
+        )!
+        event.setIntegerValueField(.scrollWheelEventScrollPhase, value: phase)
+        return NSEvent(cgEvent: event)!
+    }
+
+    private func send(_ event: NSEvent, to scrollView: NSScrollView) {
+        scrollView.scrollWheel(with: event)
+        RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        host.layout()
+    }
+
+    private final class WheelRecorder: NSView {
+        var events: [NSEvent] = []
+        override func scrollWheel(with event: NSEvent) {
+            events.append(event)
+        }
+    }
+
+    func testVerticalWheelOverANestedHScrollScrollsTheOuterVScroll() {
+        let inner = HScroll { for _ in 0..<10 { SizedView(width: 100, height: 50) } }
+        let outer: VScroll = host.rootView.addVScroll(alignment: .fill) {
+            inner
+            for _ in 0..<10 { SizedView(width: 50, height: 100) }
+        }
+        host.layout()
+
+        send(wheel(dy: -40), to: inner)
+        XCTAssertEqual(outer.documentVisibleRect.origin, CGPoint(x: 0, y: 40))
+        XCTAssertEqual(inner.documentVisibleRect.origin, .zero)
+
+        send(wheel(dx: -30), to: inner)
+        XCTAssertEqual(inner.documentVisibleRect.origin, CGPoint(x: 30, y: 0), "Its own direction stays with it.")
+        XCTAssertEqual(outer.documentVisibleRect.origin, CGPoint(x: 0, y: 40))
+    }
+
+    func testHorizontalWheelOverANestedVScrollScrollsTheOuterHScroll() {
+        let inner = VScroll { for _ in 0..<10 { SizedView(width: 50, height: 100) } }.frame(width: 100)
+        let outer: HScroll = host.rootView.addHScroll(alignment: .fill) {
+            inner
+            for _ in 0..<10 { SizedView(width: 100, height: 50) }
+        }
+        host.layout()
+
+        send(wheel(dx: -40), to: inner)
+        XCTAssertEqual(outer.documentVisibleRect.origin, CGPoint(x: 40, y: 0))
+        XCTAssertEqual(inner.documentVisibleRect.origin, .zero)
+
+        send(wheel(dy: -30), to: inner)
+        XCTAssertEqual(inner.documentVisibleRect.origin, CGPoint(x: 0, y: 30), "Its own direction stays with it.")
+        XCTAssertEqual(outer.documentVisibleRect.origin, CGPoint(x: 40, y: 0))
+    }
+
+    func testATrackpadGestureKeepsTheDirectionItStartedWith() {
+        let recorder = WheelRecorder()
+        let scrollView = recorder.addContent(HScroll { for _ in 0..<10 { SizedView(width: 100, height: 50) } })
+        host.rootView.addContent(recorder)
+        host.layout()
+
+        let began = wheel(dx: -2, dy: -40, phase: 1)
+        let drifted = wheel(dx: -40, dy: -2, phase: 2)
+        XCTAssertEqual(began.phase, .began, "The synthetic events must carry a gesture phase.")
+        XCTAssertEqual(drifted.phase, .changed)
+
+        scrollView.scrollWheel(with: began)
+        scrollView.scrollWheel(with: drifted)
+        XCTAssertEqual(recorder.events.count, 2, "A gesture that began vertically is passed on to its end.")
+        XCTAssertEqual(scrollView.documentVisibleRect.origin, .zero)
+    }
+
     func testScrollViewModifiers() {
         let scrollView: NSScrollView = NSScrollView()
             .horizontalScrollElasticity(.none)

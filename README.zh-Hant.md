@@ -395,6 +395,7 @@ view.addVScroll(alignment: .fill, spacing: 12) {
 - 內容從頂部開始。比捲動視圖短的內容保持本身的長度，停在頂部，不會被延展填滿。
 - 捲動軸是無界的，因此捲動視圖中的 `Spacer` 長度只有 `minLength`。
 - 捲動視圖在捲動軸上沒有固有尺寸。巢狀放在 stack 中時，`HScroll` 的寬度需要由外部給定，`VScroll` 則是高度：請像上面那樣在外層 stack 中使用 `.fill` 對齊，或使用 `frame`。
+- 另一個方向的捲動會被轉交出去：指標停在巢狀放置於 `VScroll` 中的 `HScroll` 上時，垂直捲動會捲動外層的 `VScroll`；巢狀放置於 `HScroll` 中的 `VScroll` 則相反。一般的 `NSScrollView` 會自己吞掉這些事件。觸控板手勢會保持它開始時的方向。
 - `showsIndicators` 控制捲動方向上的捲軸，對應 `hasHorizontalScroller` 或 `hasVerticalScroller`。
 - 捲動視圖不繪製背景，因此它後方的內容會透出來；用 `.drawsBackground(true)` 與 `.backgroundColor(_:)` 即可給它一個背景。`automaticallyAdjustsContentInsets` 為 `false`，因此內容從捲動視圖的邊緣開始；以 `safeArea` 掛載即可讓整個捲動視圖保持在安全區域內。
 

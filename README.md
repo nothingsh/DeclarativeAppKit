@@ -395,6 +395,7 @@ view.addVScroll(alignment: .fill, spacing: 12) {
 - The content starts at the top. Content shorter than the scroll view keeps its own length, stays at the top and is not stretched to fill it.
 - The scrolling axis is unbounded, so a `Spacer` in a scroll view is only `minLength` long.
 - A scroll view has no intrinsic size along its scrolling axis. Nested in a stack, an `HScroll` needs its width from outside and a `VScroll` its height: use `.fill` alignment in the enclosing stack, as above, or `frame`.
+- Scrolling in the other direction is passed on: with the pointer over an `HScroll` nested in a `VScroll`, scrolling vertically scrolls the `VScroll`, and the reverse for a `VScroll` nested in an `HScroll`. A plain `NSScrollView` consumes those events instead. A trackpad gesture keeps the direction it began with.
 - `showsIndicators` controls the scroller of the scrolling direction, through `hasHorizontalScroller` or `hasVerticalScroller`.
 - The scroll view draws no background, so what is behind it shows through; use `.drawsBackground(true)` and `.backgroundColor(_:)` to give it one. `automaticallyAdjustsContentInsets` is `false`, so the content starts at the scroll view's edges; mount it with `safeArea` to keep the whole scroll view inside the safe area.
 

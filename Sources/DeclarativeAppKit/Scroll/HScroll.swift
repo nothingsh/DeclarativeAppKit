@@ -13,6 +13,8 @@ public final class HScroll: NSScrollView {
     /// The stack that arranges the elements, for configuration without a forwarding modifier.
     public let stack: HStack
 
+    private var passesGestureOn = false
+
     /// - Parameters:
     ///   - alignment: How the elements line up on the vertical axis.
     ///   - spacing: The distance between elements. There is none by default.
@@ -33,6 +35,23 @@ public final class HScroll: NSScrollView {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("HScroll is built in code and does not support init(coder:).")
+    }
+
+    /// Passes vertical scrolling on to the next responder, so that a scroll view around this
+    /// one scrolls while the pointer is over it. An `NSScrollView` otherwise consumes every
+    /// scroll-wheel event, including those in a direction it does not scroll.
+    ///
+    /// A trackpad gesture keeps the direction it began with; a plain wheel click, which has
+    /// no phase, is decided on its own.
+    public override func scrollWheel(with event: NSEvent) {
+        if event.phase == .began || (event.phase == [] && event.momentumPhase == []) {
+            passesGestureOn = abs(event.scrollingDeltaY) > abs(event.scrollingDeltaX)
+        }
+        if passesGestureOn {
+            nextResponder?.scrollWheel(with: event)
+        } else {
+            super.scrollWheel(with: event)
+        }
     }
 
     /// Sets whether the horizontal scroller is shown.

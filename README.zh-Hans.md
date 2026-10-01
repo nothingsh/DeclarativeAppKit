@@ -395,6 +395,7 @@ view.addVScroll(alignment: .fill, spacing: 12) {
 - 内容从顶部开始。比滚动视图短的内容保持自身长度，停在顶部，不会被拉伸填满。
 - 滚动轴是无界的，因此滚动视图中的 `Spacer` 长度只有 `minLength`。
 - 滚动视图在滚动轴上没有固有尺寸。嵌套在 stack 中时，`HScroll` 的宽度需要由外部给出，`VScroll` 则是高度：请像上面那样在外层 stack 中使用 `.fill` 对齐，或使用 `frame`。
+- 另一个方向的滚动会被转交出去：指针停在嵌套于 `VScroll` 中的 `HScroll` 上时，纵向滚动会滚动外层的 `VScroll`；嵌套于 `HScroll` 中的 `VScroll` 则相反。普通的 `NSScrollView` 会自己吞掉这些事件。触控板手势会保持它开始时的方向。
 - `showsIndicators` 控制滚动方向上的滚动条，对应 `hasHorizontalScroller` 或 `hasVerticalScroller`。
 - 滚动视图不绘制背景，因此它后面的内容会透出来；用 `.drawsBackground(true)` 与 `.backgroundColor(_:)` 可以给它一个背景。`automaticallyAdjustsContentInsets` 为 `false`，因此内容从滚动视图的边缘开始；用 `safeArea` 挂载可以让整个滚动视图保持在安全区内。
 
