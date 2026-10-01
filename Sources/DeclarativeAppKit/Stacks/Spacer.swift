@@ -1,0 +1,74 @@
+import AppKit
+
+/// An empty view that takes the remaining length along the axis of the stack it is in.
+///
+/// A spacer gives way before any view with content: its hugging on the stack's axis is the
+/// lowest, so it absorbs the extra space, and it never grows on the cross axis. Several
+/// spacers in one stack share the extra space equally. `minLength` is kept as a required
+/// minimum; when the stack cannot fit it, the other views shrink according to their
+/// compression resistance. Along an unbounded axis, such as the scrolling axis of a scroll
+/// view, there is no remaining length, so a spacer is only `minLength` long.
+///
+/// The axis is read when the spacer is added to an `NSStackView`. Changing that stack's
+/// `orientation` afterwards is not followed. A spacer outside an `NSStackView` has no
+/// effect, and adding it to one is reported.
+public final class Spacer: NSView {
+
+    /// The length the spacer keeps at least, along the stack's axis.
+    public let minLength: CGFloat
+
+    public init(minLength: CGFloat = 0) {
+        precondition(
+            minLength.isFinite && minLength >= 0,
+            "Spacer minLength must be finite and not negative."
+        )
+        self.minLength = minLength
+        super.init(frame: .zero)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("Spacer is built in code and does not support init(coder:).")
+    }
+
+    public override var intrinsicContentSize: NSSize { .zero }
+
+    public override func viewDidMoveToSuperview() {
+        super.viewDidMoveToSuperview()
+        guard let superview else { return }
+        guard let stack = superview as? NSStackView else {
+            NSLog(
+                "DeclarativeAppKit: a Spacer was added to %@, which is not an NSStackView. "
+                    + "A spacer only takes space inside a stack, so it has no effect here.",
+                String(describing: type(of: superview))
+            )
+            return
+        }
+
+        let identifier = "DeclarativeAppKit.spacer.minLength"
+        constraints.first { $0.identifier == identifier }?.isActive = false
+
+        let axis: NSLayoutConstraint.Orientation = stack.orientation == .horizontal ? .horizontal : .vertical
+        let crossAxis: NSLayoutConstraint.Orientation = axis == .horizontal ? .vertical : .horizontal
+        setContentHuggingPriority(.fittingSizeCompression, for: axis)
+        setContentHuggingPriority(.defaultLow, for: crossAxis)
+
+        translatesAutoresizingMaskIntoConstraints = false
+        let minimum = length(axis).constraint(greaterThanOrEqualToConstant: minLength)
+        minimum.identifier = identifier
+        minimum.isActive = true
+
+        // Below the default hugging of views with content, so sharing the extra space
+        // equally never stretches them. Tied to every other spacer, so the rest go on
+        // sharing equally when one of them leaves the stack.
+        for case let other as Spacer in stack.subviews where other !== self {
+            let equal = length(axis).constraint(equalTo: other.length(axis))
+            equal.priority = NSLayoutConstraint.Priority(NSLayoutConstraint.Priority.defaultLow.rawValue - 1)
+            equal.isActive = true
+        }
+    }
+
+    private func length(_ axis: NSLayoutConstraint.Orientation) -> NSLayoutDimension {
+        axis == .horizontal ? widthAnchor : heightAnchor
+    }
+}
