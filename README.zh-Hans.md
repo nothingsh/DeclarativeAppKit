@@ -4,7 +4,11 @@
 
 一个轻量的 AppKit 声明式布局库：在原生 `NSView` 与 Auto Layout 之上提供 SwiftUI 风格的 stack、padding 与 modifier，不依赖任何第三方库。
 
-它没有渲染层，也不维护平行的视图层级。它返回的始终是真正的 `NSView` 或其子类，因此可以与现有 AppKit 代码自由混用。UIKit 版本见兄弟包 [DeclarativeUIKit](https://github.com/nothingsh/DeclarativeUIKit)。
+它没有渲染层，也不维护平行的视图层级。它返回的始终是真正的 `NSView` 或其子类，因此可以与现有 AppKit 代码自由混用。
+
+数据绑定由配套的包 [DeclarativeCombine](https://github.com/nothingsh/DeclarativeCombine) 提供，见[数据绑定](#数据绑定)。
+
+UIKit 版本见兄弟包 [DeclarativeUIKit](https://github.com/nothingsh/DeclarativeUIKit)。
 
 ```swift
 view.addVStack(alignment: .leading, spacing: 4) {
@@ -27,6 +31,7 @@ view.addVStack(alignment: .leading, spacing: 4) {
   - [Background 与 overlay](#background-与-overlay)
   - [Spacer](#spacer)
   - [滚动视图](#滚动视图)
+- [数据绑定](#数据绑定)
 - [示例应用](#示例应用)
   - [个人资料卡片](#个人资料卡片)
   - [表单](#表单)
@@ -188,6 +193,27 @@ view.addVScroll(alignment: .fill, spacing: 12) {
 - 另一个方向的滚动会被转交出去，因此指针停在 `HScroll` 上时，上面的页面仍然可以纵向滚动。
 - 滚动视图不绘制背景，除非你设置 `.drawsBackground(true)`。
 
+## 数据绑定
+
+DeclarativeAppKit 只负责布局：内容闭包只运行一次，库本身不提供绑定。之后需要变化或上报事件的视图，必须存成属性，再手动连接。
+
+[DeclarativeCombine](https://github.com/nothingsh/DeclarativeCombine) 是配套的包，用来省掉这一步。它为 AppKit 的控件、文本视图、滚动视图和手势提供 Combine publisher，并提供一组 modifier，让视图在声明它的地方直接绑定到 publisher：
+
+```swift
+view.addVStack(alignment: .fill, spacing: 12) {
+    NSTextField(labelWithString: "")
+        .font(.preferredFont(forTextStyle: .body))
+        .bind(\.stringValue, to: viewModel.$title)
+
+    NSButton()
+        .title("Submit")
+        .bind(\.isEnabled, to: viewModel.$canSubmit)
+        .sink(\.clickPublisher) { [weak self] in self?.submit() }
+}
+```
+
+它是可选的、独立的包。DeclarativeAppKit 不依赖它，它也不依赖 DeclarativeAppKit；两个包一起添加即可配合使用。它的 macOS 示例应用把下面的[表单](#表单)页面重写了一遍，一个视图都没有存成属性。
+
 ## 示例应用
 
 `Example/Example.xcodeproj` 是一个小型 macOS 应用，以本地 package 的方式使用本库。在 Xcode 中打开它，选择 `Example` scheme 并运行。它的窗口为每个页面提供一个标签页，下面的代码片段节选自这三个页面。
@@ -344,7 +370,7 @@ private func chip(_ text: String) -> NSView {
 
 - 只有 `HStack` 与 `VStack` 支持 `fill` 对齐并保持 padding 固定。在普通的 `NSStackView` 上，AppKit 会让过大的元素占用交叉轴方向的 padding。
 - `background(_:)` 会给 stack 增加一个子视图，即绘制该颜色的 `NSBox`。
-- 没有 target–action 辅助，也没有数据绑定。
+- 本库没有 target–action 辅助，也没有数据绑定；见[数据绑定](#数据绑定)。
 - 本 package 声明的最低版本是 macOS 11，API 都按 macOS 11 的可用性审查过，但当前的工具链最低只能以 macOS 12 为目标构建，因此从未针对 macOS 11 本身构建或运行过。
 
 ## 开发

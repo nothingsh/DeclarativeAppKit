@@ -4,7 +4,11 @@
 
 一個輕量的 AppKit 宣告式版面配置函式庫：在原生 `NSView` 與 Auto Layout 之上提供 SwiftUI 風格的 stack、padding 與 modifier，不依賴任何第三方函式庫。
 
-它沒有繪製層，也不維護平行的視圖階層。它回傳的永遠是真正的 `NSView` 或其子類別，因此能與既有的 AppKit 程式碼自由混用。UIKit 版本請見姊妹套件 [DeclarativeUIKit](https://github.com/nothingsh/DeclarativeUIKit)。
+它沒有繪製層，也不維護平行的視圖階層。它回傳的永遠是真正的 `NSView` 或其子類別，因此能與既有的 AppKit 程式碼自由混用。
+
+資料繫結由搭配的套件 [DeclarativeCombine](https://github.com/nothingsh/DeclarativeCombine) 提供，請見[資料繫結](#資料繫結)。
+
+UIKit 版本請見姊妹套件 [DeclarativeUIKit](https://github.com/nothingsh/DeclarativeUIKit)。
 
 ```swift
 view.addVStack(alignment: .leading, spacing: 4) {
@@ -27,6 +31,7 @@ view.addVStack(alignment: .leading, spacing: 4) {
   - [Background 與 overlay](#background-與-overlay)
   - [Spacer](#spacer)
   - [捲動視圖](#捲動視圖)
+- [資料繫結](#資料繫結)
 - [範例 App](#範例-app)
   - [個人資料卡片](#個人資料卡片)
   - [表單](#表單)
@@ -188,6 +193,27 @@ view.addVScroll(alignment: .fill, spacing: 12) {
 - 另一個方向的捲動會被轉交出去，因此指標停在 `HScroll` 上時，上面的頁面仍然可以垂直捲動。
 - 捲動視圖不繪製背景，除非你設定 `.drawsBackground(true)`。
 
+## 資料繫結
+
+DeclarativeAppKit 只負責版面配置：內容閉包只執行一次，函式庫本身不提供繫結。之後需要變化或回報事件的視圖，必須存成屬性，再手動連接。
+
+[DeclarativeCombine](https://github.com/nothingsh/DeclarativeCombine) 是搭配的套件，用來省掉這一步。它為 AppKit 的控制項、文字視圖、捲動視圖和手勢提供 Combine publisher，並提供一組 modifier，讓視圖在宣告它的地方直接繫結到 publisher：
+
+```swift
+view.addVStack(alignment: .fill, spacing: 12) {
+    NSTextField(labelWithString: "")
+        .font(.preferredFont(forTextStyle: .body))
+        .bind(\.stringValue, to: viewModel.$title)
+
+    NSButton()
+        .title("Submit")
+        .bind(\.isEnabled, to: viewModel.$canSubmit)
+        .sink(\.clickPublisher) { [weak self] in self?.submit() }
+}
+```
+
+它是選用的、獨立的套件。DeclarativeAppKit 不依賴它，它也不依賴 DeclarativeAppKit；兩個套件一起加入即可搭配使用。它的 macOS 範例 App 把下面的[表單](#表單)畫面重寫了一遍，一個視圖都沒有存成屬性。
+
 ## 範例 App
 
 `Example/Example.xcodeproj` 是一個小型 macOS App，以本地 package 的方式使用本函式庫。在 Xcode 中開啟它，選擇 `Example` scheme 並執行。它的視窗為每個畫面提供一個標籤頁，下面的程式碼片段節錄自這三個畫面。
@@ -344,7 +370,7 @@ private func chip(_ text: String) -> NSView {
 
 - 只有 `HStack` 與 `VStack` 支援 `fill` 對齊並保持 padding 固定。在一般的 `NSStackView` 上，AppKit 會讓過大的元素佔用交叉軸方向的 padding。
 - `background(_:)` 會給 stack 增加一個子視圖，即繪製該顏色的 `NSBox`。
-- 沒有 target–action 輔助，也沒有資料繫結。
+- 本函式庫沒有 target–action 輔助，也沒有資料繫結；請見[資料繫結](#資料繫結)。
 - 本 package 宣告的最低版本是 macOS 11，API 皆依 macOS 11 的可用性審查過，但目前的工具鏈最低只能以 macOS 12 為目標建置，因此從未針對 macOS 11 本身建置或執行過。
 
 ## 開發

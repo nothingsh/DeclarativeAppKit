@@ -4,7 +4,11 @@
 
 A lightweight declarative layout library for AppKit: SwiftUI-style stacks, padding and modifiers on top of plain `NSView` and Auto Layout, with no third-party dependencies.
 
-There is no rendering layer and no parallel view hierarchy. Everything it returns is a real `NSView` or subclass, so it mixes freely with existing AppKit code. For UIKit, see the sibling package [DeclarativeUIKit](https://github.com/nothingsh/DeclarativeUIKit).
+There is no rendering layer and no parallel view hierarchy. Everything it returns is a real `NSView` or subclass, so it mixes freely with existing AppKit code.
+
+Data binding lives in a companion package, [DeclarativeCombine](https://github.com/nothingsh/DeclarativeCombine); see [Data binding](#data-binding).
+
+For UIKit, see the sibling package [DeclarativeUIKit](https://github.com/nothingsh/DeclarativeUIKit).
 
 ```swift
 view.addVStack(alignment: .leading, spacing: 4) {
@@ -27,6 +31,7 @@ view.addVStack(alignment: .leading, spacing: 4) {
   - [Background and overlay](#background-and-overlay)
   - [Spacer](#spacer)
   - [Scroll views](#scroll-views)
+- [Data binding](#data-binding)
 - [Example app](#example-app)
   - [Profile card](#profile-card)
   - [Form](#form)
@@ -188,6 +193,27 @@ view.addVScroll(alignment: .fill, spacing: 12) {
 - Scrolling in the other direction is passed on, so the page above still scrolls vertically while the pointer is over the `HScroll`.
 - A scroll view draws no background unless you set `.drawsBackground(true)`.
 
+## Data binding
+
+DeclarativeAppKit lays views out and stops there: a content closure runs once, and the library has no binding of its own. A view that changes later, or that reports events, has to be kept in a property and wired by hand.
+
+[DeclarativeCombine](https://github.com/nothingsh/DeclarativeCombine) is the companion package that removes that step. It provides Combine publishers for AppKit controls, text views, scroll views and gestures, and modifiers that bind a view to a publisher in the place where the view is declared:
+
+```swift
+view.addVStack(alignment: .fill, spacing: 12) {
+    NSTextField(labelWithString: "")
+        .font(.preferredFont(forTextStyle: .body))
+        .bind(\.stringValue, to: viewModel.$title)
+
+    NSButton()
+        .title("Submit")
+        .bind(\.isEnabled, to: viewModel.$canSubmit)
+        .sink(\.clickPublisher) { [weak self] in self?.submit() }
+}
+```
+
+It is optional and separate. DeclarativeAppKit does not depend on it, and it does not depend on DeclarativeAppKit; add both packages to use them together. Its macOS example app rebuilds the [Form](#form) screen below without keeping a single view in a property.
+
 ## Example app
 
 `Example/Example.xcodeproj` is a small macOS app that uses the library as a local package. Open it in Xcode, choose the `Example` scheme and run. Its window has one tab per screen, and the snippets below are trimmed from the three screens.
@@ -344,7 +370,7 @@ The app's deployment target is macOS 12.0, the lowest the current Xcode can buil
 
 - Only `HStack` and `VStack` have the `fill` alignment and keep padding fixed. On a plain `NSStackView`, AppKit lets an element that is too large take over the padding across the stack's axis.
 - `background(_:)` adds a subview to the stack, the `NSBox` that draws the color.
-- There are no target–action helpers and no data binding.
+- There are no target–action helpers and no data binding in this package; see [Data binding](#data-binding).
 - The package declares a minimum of macOS 11 and its APIs are reviewed for macOS 11 availability, but current toolchains build for macOS 12 at the lowest, so nothing has been built or run against macOS 11 itself.
 
 ## Development
