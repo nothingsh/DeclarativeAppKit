@@ -26,4 +26,12 @@ public extension NSImageView {
         self.contentTintColor = value
         return self
     }
+
+    /// Sets the configuration used for symbol images, such as their point size, weight
+    /// and scale.
+    @discardableResult
+    func symbolConfiguration(_ value: NSImage.SymbolConfiguration?) -> Self {
+        self.symbolConfiguration = value
+        return self
+    }
 }
