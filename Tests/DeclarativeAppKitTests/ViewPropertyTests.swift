@@ -31,6 +31,19 @@ final class ViewPropertyTests: XCTestCase {
         XCTAssertTrue(configured === field)
     }
 
+    func testCustomSubclassKeepsItsTypeThroughConfigure() {
+        final class CounterView: NSView {
+            var count = 0
+        }
+
+        let result: CounterView = CounterView()
+            .configure { $0.count = 3 }
+            .alphaValue(0.5)
+
+        XCTAssertEqual(result.count, 3)
+        XCTAssertEqual(result.alphaValue, 0.5)
+    }
+
     func testLayerModifiers() {
         let view: NSTextField = NSTextField()
             .cornerRadius(12, curve: .continuous)

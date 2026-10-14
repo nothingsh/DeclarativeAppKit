@@ -1,7 +1,13 @@
 import AppKit
 
-@MainActor
-public extension NSView {
+/// Provides `configure` to every view.
+///
+/// In a protocol extension `Self` is the caller's concrete type, so the closure receives a
+/// subclass with its own members. Swift 6.1 and earlier do not give a class extension's
+/// `(Self) -> Void` parameter that type.
+public protocol Configurable: AnyObject {}
+
+public extension Configurable {
 
     /// Runs `body` on this view, for AppKit properties without a dedicated modifier.
     @discardableResult
@@ -9,6 +15,12 @@ public extension NSView {
         body(self)
         return self
     }
+}
+
+extension NSView: Configurable {}
+
+@MainActor
+public extension NSView {
 
     @discardableResult
     func alphaValue(_ value: CGFloat) -> Self {
