@@ -213,4 +213,20 @@ final class StackTests: XCTestCase {
         XCTAssertEqual(first.frame.maxX, 200, "Leading is the right edge in a right-to-left layout.")
         XCTAssertEqual(first.frame.width, 50)
     }
+
+    func testSpacingAfterAViewReplacesTheSpacingThere() {
+        let first = SizedView(width: 20, height: 10)
+        let second = SizedView(width: 20, height: 10)
+        let third = SizedView(width: 20, height: 10)
+        let stack: VStack = VStack(spacing: 4) {
+            first
+            second
+            third
+        }
+        .spacing(20, after: first)
+        host.place(stack)
+
+        XCTAssertEqual(second.frame.minY - first.frame.maxY, 20)
+        XCTAssertEqual(third.frame.minY - second.frame.maxY, 4, "Other gaps keep spacing.")
+    }
 }
