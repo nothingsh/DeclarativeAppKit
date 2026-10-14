@@ -47,4 +47,12 @@ public extension NSTextField {
         self.isSelectable = value
         return self
     }
+
+    /// Lets the text tighten its letter spacing before it is truncated. AppKit has no
+    /// counterpart of shrinking the font to fit.
+    @discardableResult
+    func allowsDefaultTighteningForTruncation(_ value: Bool) -> Self {
+        self.allowsDefaultTighteningForTruncation = value
+        return self
+    }
 }

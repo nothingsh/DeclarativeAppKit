@@ -33,6 +33,7 @@ final class ControlPropertyTests: XCTestCase {
             .maximumNumberOfLines(3)
             .isEditable(false)
             .isSelectable(true)
+            .allowsDefaultTighteningForTruncation(true)
 
         XCTAssertEqual(field.stringValue, "Ada")
         XCTAssertEqual(field.placeholderString, "Name")
@@ -40,6 +41,7 @@ final class ControlPropertyTests: XCTestCase {
         XCTAssertEqual(field.maximumNumberOfLines, 3)
         XCTAssertFalse(field.isEditable)
         XCTAssertTrue(field.isSelectable)
+        XCTAssertTrue(field.allowsDefaultTighteningForTruncation)
         XCTAssertEqual(NSTextField().attributedStringValue(attributed).attributedStringValue.string, "Styled")
     }
 
@@ -93,6 +95,7 @@ final class ControlPropertyTests: XCTestCase {
     }
 
     func testSliderSwitchAndImageViewModifiers() {
+        let symbols = NSImage.SymbolConfiguration(pointSize: 24, weight: .bold)
         let slider: NSSlider = NSSlider()
             .minValue(10)
             .maxValue(20)
@@ -112,9 +115,11 @@ final class ControlPropertyTests: XCTestCase {
             .imageScaling(.scaleProportionallyUpOrDown)
             .imageAlignment(.alignTopLeft)
             .contentTintColor(.systemPurple)
+            .symbolConfiguration(symbols)
         XCTAssertTrue(imageView.image === image)
         XCTAssertEqual(imageView.imageScaling, .scaleProportionallyUpOrDown)
         XCTAssertEqual(imageView.imageAlignment, .alignTopLeft)
         XCTAssertEqual(imageView.contentTintColor, .systemPurple)
+        XCTAssertEqual(imageView.symbolConfiguration, symbols)
     }
 }
