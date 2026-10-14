@@ -50,6 +50,26 @@ final class ScrollTests: XCTestCase {
         ))
     }
 
+    func testEveryPaddingFormAndCustomSpacingReachTheEmbeddedStack() {
+        let first = NSView()
+        let vertical = VScroll { first }
+
+        vertical.padding(horizontal: 12, vertical: 4)
+        XCTAssertTrue(NSEdgeInsetsEqual(vertical.stack.edgeInsets, NSEdgeInsets(top: 4, left: 12, bottom: 4, right: 12)))
+        vertical.padding(top: 1, leading: 2, bottom: 3, trailing: 4)
+        XCTAssertTrue(NSEdgeInsetsEqual(vertical.stack.edgeInsets, NSEdgeInsets(top: 1, left: 2, bottom: 3, right: 4)))
+        vertical.padding(.top, 24, others: 8)
+        XCTAssertTrue(NSEdgeInsetsEqual(vertical.stack.edgeInsets, NSEdgeInsets(top: 24, left: 8, bottom: 8, right: 8)))
+        vertical.spacing(10, after: first)
+        XCTAssertEqual(vertical.stack.customSpacing(after: first), 10)
+
+        let insets = NSDirectionalEdgeInsets(top: 5, leading: 6, bottom: 7, trailing: 8)
+        XCTAssertTrue(NSEdgeInsetsEqual(
+            HScroll { NSView() }.padding(insets).stack.edgeInsets,
+            NSEdgeInsets(top: 5, left: 6, bottom: 7, right: 8)
+        ))
+    }
+
     func testVScrollStartsAtTheTopAndScrollsItsContent() {
         let rows = (0..<10).map { _ in SizedView(width: 50, height: 100) }
         let scrollView: VScroll = host.rootView.addVScroll(alignment: .leading) { rows }
