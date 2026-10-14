@@ -31,6 +31,7 @@ view.addVStack(alignment: .leading, spacing: 4) {
   - [Background and overlay](#background-and-overlay)
   - [Spacer](#spacer)
   - [Scroll views](#scroll-views)
+  - [Xcode previews](#xcode-previews)
 - [Data binding](#data-binding)
 - [Example app](#example-app)
   - [Profile card](#profile-card)
@@ -51,6 +52,8 @@ dependencies: [
 ```
 
 Or in Xcode, choose File → Add Package Dependencies and enter `https://github.com/nothingsh/DeclarativeAppKit`.
+
+Changes between versions are listed in [CHANGELOG.md](CHANGELOG.md). For the API reference, open the package in Xcode and choose Product → Build Documentation.
 
 ## Usage
 
@@ -85,7 +88,7 @@ let column = VStack(alignment: .leading, spacing: 4) {
 
 - `HStack` and `VStack` are `NSStackView` subclasses, so every native stack API stays available. Constructing one does not mount it.
 - `alignment` is the cross axis: `leading`, `center`, `trailing` or `fill` for a `VStack`; `top`, `center`, `bottom`, `firstTextBaseline`, `lastTextBaseline` or `fill` for an `HStack`. `fill` stretches every element.
-- `spacing` defaults to `0`, so the gaps you see are the ones you write. `.spacing(_:)`, `.alignment(_:)` and `.distribution(_:)` change a stack afterwards.
+- `spacing` defaults to `0`, so the gaps you see are the ones you write. `.spacing(_:)`, `.alignment(_:)` and `.distribution(_:)` change a stack afterwards, and `.spacing(_:after:)` sets a different distance after one element.
 - A content closure accepts views, optional views, arrays, `if` / `else`, `switch`, `for` and `if #available`.
 
 ### Property modifiers
@@ -110,16 +113,23 @@ let avatar = NSImageView()
 
 | Type | Modifiers |
 | --- | --- |
-| `NSView` | `configure`, `alphaValue`, `isHidden`, `toolTip`, `clipsToBounds`, `accessibilityLabel`, `accessibilityIdentifier` |
+| `NSView` | `configure`, `alphaValue`, `isHidden`, `toolTip`, `clipsToBounds`, `accessibilityLabel`, `accessibilityHelp`, `accessibilityRole`, `isAccessibilityElement`, `accessibilityIdentifier`, `cornerRadius`, `border(color:width:)`, `shadow` |
 | `NSControl` | `isEnabled`, `isHighlighted`, `controlSize`, `font`, `alignment`, `lineBreakMode` |
-| `NSTextField` | `stringValue`, `attributedStringValue`, `placeholderString`, `textColor`, `maximumNumberOfLines`, `isEditable`, `isSelectable` |
+| `NSTextField` | `stringValue`, `attributedStringValue`, `placeholderString`, `textColor`, `maximumNumberOfLines`, `isEditable`, `isSelectable`, `allowsDefaultTighteningForTruncation` |
 | `NSButton` | `title`, `attributedTitle`, `image`, `alternateTitle`, `alternateImage`, `imagePosition`, `bezelStyle`, `buttonType`, `state`, `contentTintColor` |
 | `NSTextView` | `string`, `font`, `textColor`, `alignment`, `isEditable`, `isSelectable` |
 | `NSSlider` | `doubleValue`, `minValue`, `maxValue`, `trackFillColor` |
 | `NSSwitch` | `state` |
-| `NSImageView` | `image`, `imageScaling`, `imageAlignment`, `contentTintColor` |
+| `NSStepper` | `doubleValue`, `minValue`, `maxValue`, `increment`, `valueWraps`, `autorepeat` |
+| `NSSegmentedControl` | `selectedSegment`, `selectedSegmentBezelColor`, `trackingMode` |
+| `NSProgressIndicator` | `style`, `isIndeterminate`, `doubleValue`, `minValue`, `maxValue`, `isDisplayedWhenStopped`, `isAnimating` |
+| `NSImageView` | `image`, `imageScaling`, `imageAlignment`, `contentTintColor`, `symbolConfiguration` |
 
 A label is an `NSTextField` made with `NSTextField(labelWithString:)` or `NSTextField(wrappingLabelWithString:)`. Events stay AppKit's own target–action and delegates.
+
+Value modifiers such as `doubleValue`, `state` and `selectedSegment` do not send the control's action. `isAnimating` starts or stops a progress indicator. `accessibilityHelp` and `accessibilityRole` are AppKit's counterparts of an accessibility hint and traits.
+
+`cornerRadius` and `border` make the view layer-backed and set its layer; `cornerRadius` does not clip its content or subviews. `shadow` sets the view's `shadow`, with `offset` positive toward the right and the bottom. A border or shadow color is resolved once and does not follow a later switch between light and dark mode.
 
 ### Padding and frame
 
@@ -191,7 +201,25 @@ view.addVScroll(alignment: .fill, spacing: 12) {
 - `HScroll` and `VScroll` are `NSScrollView` subclasses that arrange their elements with an embedded stack, available as `stack`. The elements decide the scrollable length; on the other axis the content matches the scroll view.
 - Nested in a stack, an `HScroll` needs its width from outside and a `VScroll` its height: use `.fill` alignment, as above, or `frame`.
 - Scrolling in the other direction is passed on, so the page above still scrolls vertically while the pointer is over the `HScroll`.
+- `alignment`, `spacing`, `spacing(_:after:)` and every form of `padding` are forwarded to `stack`; the padding lies inside the scrolled content.
 - A scroll view draws no background unless you set `.drawsBackground(true)`.
+
+### Xcode previews
+
+Xcode 15 and later preview an AppKit view directly. The `#Preview` macro for AppKit needs macOS 14, so in a target that supports older versions, mark the preview with `@available(macOS 14, *)`. Only the preview needs macOS 14; the rest of the code keeps its deployment target.
+
+```swift
+@available(macOS 14, *)
+#Preview {
+    VStack(alignment: .leading, spacing: 4) {
+        NSTextField(labelWithString: "Ada Lovelace")
+            .font(.preferredFont(forTextStyle: .headline))
+        NSTextField(labelWithString: "Mathematician")
+            .textColor(.secondaryLabelColor)
+    }
+    .padding(16)
+}
+```
 
 ## Data binding
 
@@ -370,6 +398,7 @@ The app's deployment target is macOS 12.0, the lowest the current Xcode can buil
 
 - Only `HStack` and `VStack` have the `fill` alignment and keep padding fixed. On a plain `NSStackView`, AppKit lets an element that is too large take over the padding across the stack's axis.
 - `background(_:)` adds a subview to the stack, the `NSBox` that draws the color.
+- `VScroll` and `HScroll` are not lazy: every element is created and laid out up front. They suit pages and short lists; for long or unbounded lists, use `NSTableView` or `NSCollectionView`.
 - There are no target–action helpers and no data binding in this package; see [Data binding](#data-binding).
 - The package declares a minimum of macOS 11 and its APIs are reviewed for macOS 11 availability, but current toolchains build for macOS 12 at the lowest, so nothing has been built or run against macOS 11 itself.
 

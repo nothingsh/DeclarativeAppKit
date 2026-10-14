@@ -31,6 +31,7 @@ view.addVStack(alignment: .leading, spacing: 4) {
   - [Background 與 overlay](#background-與-overlay)
   - [Spacer](#spacer)
   - [捲動視圖](#捲動視圖)
+  - [Xcode 預覽](#xcode-預覽)
 - [資料繫結](#資料繫結)
 - [範例 App](#範例-app)
   - [個人資料卡片](#個人資料卡片)
@@ -51,6 +52,8 @@ dependencies: [
 ```
 
 或在 Xcode 中選擇 File → Add Package Dependencies，輸入 `https://github.com/nothingsh/DeclarativeAppKit`。
+
+各版本的變更請見 [CHANGELOG.md](CHANGELOG.md)。API 參考文件：在 Xcode 中開啟本 package，選擇 Product → Build Documentation。
 
 ## 用法
 
@@ -85,7 +88,7 @@ let column = VStack(alignment: .leading, spacing: 4) {
 
 - `HStack` 與 `VStack` 是 `NSStackView` 的子類別，所有原生 stack API 仍然可用。建構 stack 不會掛載它。
 - `alignment` 是交叉軸上的對齊：`VStack` 可用 `leading`、`center`、`trailing` 或 `fill`；`HStack` 可用 `top`、`center`、`bottom`、`firstTextBaseline`、`lastTextBaseline` 或 `fill`。`fill` 會延展每個元素。
-- `spacing` 預設為 `0`，因此你看到的間距就是你寫下的間距。之後可以用 `.spacing(_:)`、`.alignment(_:)` 與 `.distribution(_:)` 修改。
+- `spacing` 預設為 `0`，因此你看到的間距就是你寫下的間距。之後可以用 `.spacing(_:)`、`.alignment(_:)` 與 `.distribution(_:)` 修改，用 `.spacing(_:after:)` 單獨設定某個元素之後的間距。
 - 內容閉包接受視圖、可選視圖、陣列、`if` / `else`、`switch`、`for` 與 `if #available`。
 
 ### 屬性 modifier
@@ -110,16 +113,23 @@ let avatar = NSImageView()
 
 | 型別 | Modifier |
 | --- | --- |
-| `NSView` | `configure`、`alphaValue`、`isHidden`、`toolTip`、`clipsToBounds`、`accessibilityLabel`、`accessibilityIdentifier` |
+| `NSView` | `configure`、`alphaValue`、`isHidden`、`toolTip`、`clipsToBounds`、`accessibilityLabel`、`accessibilityHelp`、`accessibilityRole`、`isAccessibilityElement`、`accessibilityIdentifier`、`cornerRadius`、`border(color:width:)`、`shadow` |
 | `NSControl` | `isEnabled`、`isHighlighted`、`controlSize`、`font`、`alignment`、`lineBreakMode` |
-| `NSTextField` | `stringValue`、`attributedStringValue`、`placeholderString`、`textColor`、`maximumNumberOfLines`、`isEditable`、`isSelectable` |
+| `NSTextField` | `stringValue`、`attributedStringValue`、`placeholderString`、`textColor`、`maximumNumberOfLines`、`isEditable`、`isSelectable`、`allowsDefaultTighteningForTruncation` |
 | `NSButton` | `title`、`attributedTitle`、`image`、`alternateTitle`、`alternateImage`、`imagePosition`、`bezelStyle`、`buttonType`、`state`、`contentTintColor` |
 | `NSTextView` | `string`、`font`、`textColor`、`alignment`、`isEditable`、`isSelectable` |
 | `NSSlider` | `doubleValue`、`minValue`、`maxValue`、`trackFillColor` |
 | `NSSwitch` | `state` |
-| `NSImageView` | `image`、`imageScaling`、`imageAlignment`、`contentTintColor` |
+| `NSStepper` | `doubleValue`、`minValue`、`maxValue`、`increment`、`valueWraps`、`autorepeat` |
+| `NSSegmentedControl` | `selectedSegment`、`selectedSegmentBezelColor`、`trackingMode` |
+| `NSProgressIndicator` | `style`、`isIndeterminate`、`doubleValue`、`minValue`、`maxValue`、`isDisplayedWhenStopped`、`isAnimating` |
+| `NSImageView` | `image`、`imageScaling`、`imageAlignment`、`contentTintColor`、`symbolConfiguration` |
 
 Label 就是以 `NSTextField(labelWithString:)` 或 `NSTextField(wrappingLabelWithString:)` 建立的 `NSTextField`。事件仍使用 AppKit 自己的 target–action 與委派。
+
+`doubleValue`、`state`、`selectedSegment` 等設定值的 modifier 不會傳送控制項的 action。`isAnimating` 啟動或停止進度指示器的動畫。`accessibilityHelp` 與 `accessibilityRole` 對應 UIKit 的輔助使用提示與特徵。
+
+`cornerRadius` 與 `border` 會讓視圖使用 layer，並設定這個 layer；`cornerRadius` 不會裁切內容或子視圖。`shadow` 設定視圖的 `shadow`，`offset` 向右、向下為正。邊框與陰影顏色只解析一次，之後切換淺色與深色模式時不會跟著改變。
 
 ### Padding 與 frame
 
@@ -191,7 +201,25 @@ view.addVScroll(alignment: .fill, spacing: 12) {
 - `HScroll` 與 `VScroll` 是 `NSScrollView` 的子類別，以內建的 stack 排列元素，可透過 `stack` 存取。元素決定可捲動的長度；在另一條軸上，內容與捲動視圖一致。
 - 巢狀放在 stack 中時，`HScroll` 的寬度需要由外部給定，`VScroll` 則是高度：像上面那樣使用 `.fill` 對齊，或使用 `frame`。
 - 另一個方向的捲動會被轉交出去，因此指標停在 `HScroll` 上時，上面的頁面仍然可以垂直捲動。
+- `alignment`、`spacing`、`spacing(_:after:)` 以及各種形式的 `padding` 都會轉發給 `stack`；padding 位於捲動內容之內。
 - 捲動視圖不繪製背景，除非你設定 `.drawsBackground(true)`。
+
+### Xcode 預覽
+
+Xcode 15 以上版本可以直接預覽 AppKit 視圖。AppKit 的 `#Preview` 巨集需要 macOS 14，因此在支援更低版本的 target 中，要為預覽加上 `@available(macOS 14, *)`。只有預覽需要 macOS 14，其餘程式碼的部署目標不變。
+
+```swift
+@available(macOS 14, *)
+#Preview {
+    VStack(alignment: .leading, spacing: 4) {
+        NSTextField(labelWithString: "Ada Lovelace")
+            .font(.preferredFont(forTextStyle: .headline))
+        NSTextField(labelWithString: "Mathematician")
+            .textColor(.secondaryLabelColor)
+    }
+    .padding(16)
+}
+```
 
 ## 資料繫結
 
@@ -370,6 +398,7 @@ private func chip(_ text: String) -> NSView {
 
 - 只有 `HStack` 與 `VStack` 支援 `fill` 對齊並保持 padding 固定。在一般的 `NSStackView` 上，AppKit 會讓過大的元素佔用交叉軸方向的 padding。
 - `background(_:)` 會給 stack 增加一個子視圖，即繪製該顏色的 `NSBox`。
+- `VScroll` 與 `HScroll` 不是惰性的：所有元素都會預先建立並配置版面。它們適合頁面與較短的清單；長清單或數量不定的清單請使用 `NSTableView` 或 `NSCollectionView`。
 - 本函式庫沒有 target–action 輔助，也沒有資料繫結；請見[資料繫結](#資料繫結)。
 - 本 package 宣告的最低版本是 macOS 11，API 皆依 macOS 11 的可用性審查過，但目前的工具鏈最低只能以 macOS 12 為目標建置，因此從未針對 macOS 11 本身建置或執行過。
 
