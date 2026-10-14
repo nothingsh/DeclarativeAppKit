@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/declarative-appkit-dark.svg">
+    <img src="docs/images/declarative-appkit-light.svg" alt="DeclarativeAppKit — Declarative layout for AppKit, on plain NSView." width="850">
+  </picture>
+</p>
+
 # DeclarativeAppKit
 
 **English** | [简体中文](README.zh-Hans.md) | [繁體中文](README.zh-Hant.md)
