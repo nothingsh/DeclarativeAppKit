@@ -122,4 +122,54 @@ final class ControlPropertyTests: XCTestCase {
         XCTAssertEqual(imageView.contentTintColor, .systemPurple)
         XCTAssertEqual(imageView.symbolConfiguration, symbols)
     }
+
+    func testSegmentedControlStepperAndProgressIndicatorModifiers() {
+        let segments: NSSegmentedControl = NSSegmentedControl(
+            labels: ["Day", "Week"], trackingMode: .selectOne, target: nil, action: nil
+        )
+        .trackingMode(.selectAny)
+        .selectedSegment(1)
+        .selectedSegmentBezelColor(.systemOrange)
+        XCTAssertEqual(segments.trackingMode, .selectAny)
+        XCTAssertEqual(segments.selectedSegment, 1)
+        XCTAssertEqual(segments.selectedSegmentBezelColor, .systemOrange)
+
+        let stepper: NSStepper = NSStepper()
+            .minValue(-10)
+            .maxValue(200)
+            .increment(5)
+            .valueWraps(false)
+            .autorepeat(false)
+            .doubleValue(150)
+        XCTAssertEqual(stepper.minValue, -10)
+        XCTAssertEqual(stepper.maxValue, 200)
+        XCTAssertEqual(stepper.increment, 5)
+        XCTAssertFalse(stepper.valueWraps)
+        XCTAssertFalse(stepper.autorepeat)
+        XCTAssertEqual(stepper.doubleValue, 150)
+
+        let progress: NSProgressIndicator = NSProgressIndicator()
+            .isIndeterminate(false)
+            .minValue(10)
+            .maxValue(200)
+            .doubleValue(150)
+            .style(.spinning)
+            .isDisplayedWhenStopped(false)
+        XCTAssertFalse(progress.isIndeterminate)
+        XCTAssertEqual(progress.minValue, 10)
+        XCTAssertEqual(progress.maxValue, 200)
+        XCTAssertEqual(progress.doubleValue, 150)
+        XCTAssertEqual(progress.style, .spinning)
+        XCTAssertFalse(progress.isDisplayedWhenStopped)
+    }
+
+    func testIsAnimatingStartsAndStopsTheIndicator() {
+        final class RecordingIndicator: NSProgressIndicator {
+            var calls: [String] = []
+            override func startAnimation(_ sender: Any?) { calls.append("start") }
+            override func stopAnimation(_ sender: Any?) { calls.append("stop") }
+        }
+        let indicator = RecordingIndicator().isAnimating(true).isAnimating(false)
+        XCTAssertEqual(indicator.calls, ["start", "stop"])
+    }
 }
