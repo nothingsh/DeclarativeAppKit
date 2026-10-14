@@ -75,6 +75,14 @@ public final class VScroll: NSScrollView {
         return self
     }
 
+    /// Sets the distance after `view`, in place of `spacing`. `view` must already be one
+    /// of the elements.
+    @discardableResult
+    public func spacing(_ value: CGFloat, after view: NSView) -> Self {
+        stack.spacing(value, after: view)
+        return self
+    }
+
     /// Sets the same padding on every edge, inside the scrolled content.
     @discardableResult
     public func padding(_ length: CGFloat) -> Self {
@@ -87,6 +95,36 @@ public final class VScroll: NSScrollView {
     @discardableResult
     public func padding(_ edges: LayoutEdges = .all, _ length: CGFloat = 16) -> Self {
         stack.padding(edges, length)
+        return self
+    }
+
+    /// Sets one padding for the leading and trailing edges and another for the top and
+    /// bottom edges, inside the scrolled content.
+    @discardableResult
+    public func padding(horizontal: CGFloat, vertical: CGFloat) -> Self {
+        stack.padding(horizontal: horizontal, vertical: vertical)
+        return self
+    }
+
+    /// Sets the padding of each edge, inside the scrolled content.
+    @discardableResult
+    public func padding(top: CGFloat, leading: CGFloat, bottom: CGFloat, trailing: CGFloat) -> Self {
+        stack.padding(top: top, leading: leading, bottom: bottom, trailing: trailing)
+        return self
+    }
+
+    /// Sets `length` on the given edges and `others` on the remaining edges, inside the
+    /// scrolled content.
+    @discardableResult
+    public func padding(_ edges: LayoutEdges, _ length: CGFloat, others: CGFloat) -> Self {
+        stack.padding(edges, length, others: others)
+        return self
+    }
+
+    /// Sets the padding of every edge, inside the scrolled content.
+    @discardableResult
+    public func padding(_ insets: NSDirectionalEdgeInsets) -> Self {
+        stack.padding(insets)
         return self
     }
 }
