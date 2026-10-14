@@ -13,6 +13,9 @@ final class ViewPropertyTests: XCTestCase {
             .toolTip("Hint")
             .clipsToBounds(true)
             .accessibilityLabel("Name")
+            .accessibilityHelp("Your full name")
+            .accessibilityRole(.staticText)
+            .isAccessibilityElement(false)
             .accessibilityIdentifier("name-field")
             .configure { configured = $0 }
 
@@ -21,6 +24,9 @@ final class ViewPropertyTests: XCTestCase {
         XCTAssertEqual(field.toolTip, "Hint")
         XCTAssertTrue(field.clipsToBounds)
         XCTAssertEqual(field.accessibilityLabel(), "Name")
+        XCTAssertEqual(field.accessibilityHelp(), "Your full name")
+        XCTAssertEqual(field.accessibilityRole(), .staticText)
+        XCTAssertFalse(field.isAccessibilityElement())
         XCTAssertEqual(field.accessibilityIdentifier(), "name-field")
         XCTAssertTrue(configured === field)
     }

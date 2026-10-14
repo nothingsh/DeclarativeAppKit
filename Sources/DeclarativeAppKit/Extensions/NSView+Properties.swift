@@ -40,6 +40,25 @@ public extension NSView {
         return self
     }
 
+    /// Sets the help text, AppKit's counterpart of an accessibility hint.
+    @discardableResult
+    func accessibilityHelp(_ value: String?) -> Self {
+        setAccessibilityHelp(value)
+        return self
+    }
+
+    @discardableResult
+    func accessibilityRole(_ value: NSAccessibility.Role?) -> Self {
+        setAccessibilityRole(value)
+        return self
+    }
+
+    @discardableResult
+    func isAccessibilityElement(_ value: Bool) -> Self {
+        setAccessibilityElement(value)
+        return self
+    }
+
     @discardableResult
     func accessibilityIdentifier(_ value: String?) -> Self {
         setAccessibilityIdentifier(value)
