@@ -1,0 +1,17 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      # Complete concurrency checking with warnings as errors, so a new data race
+      # warning fails the build.
+      - name: Test
+        run: scripts/test-macos.sh -Xswiftc -strict-concurrency=complete -Xswiftc -warnings-as-errors
