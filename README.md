@@ -100,7 +100,7 @@ let column = VStack(alignment: .leading, spacing: 4) {
 
 ### Property modifiers
 
-Each modifier sets the AppKit property of the same name and returns the view as `Self`, so a chain keeps its concrete type.
+Each modifier sets an AppKit property, in most cases the one of the same name, and returns the view as `Self`, so a chain keeps its concrete type.
 
 ```swift
 let title = NSTextField(wrappingLabelWithString: "Title")

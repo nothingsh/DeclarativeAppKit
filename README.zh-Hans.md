@@ -100,7 +100,7 @@ let column = VStack(alignment: .leading, spacing: 4) {
 
 ### 属性 modifier
 
-每个 modifier 设置同名的 AppKit 属性，并以 `Self` 返回该视图，因此链式调用保留具体类型。
+每个 modifier 设置一个 AppKit 属性（多数情况下与 modifier 同名），并以 `Self` 返回该视图，因此链式调用保留具体类型。
 
 ```swift
 let title = NSTextField(wrappingLabelWithString: "Title")
