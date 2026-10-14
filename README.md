@@ -54,7 +54,7 @@ Requires macOS 11.0+ and Swift 5.9+. Add the package with Swift Package Manager:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/nothingsh/DeclarativeAppKit.git", from: "0.1.0")
+    .package(url: "https://github.com/nothingsh/DeclarativeAppKit.git", from: "0.2.0")
 ]
 ```
 

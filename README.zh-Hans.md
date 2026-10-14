@@ -54,7 +54,7 @@ view.addVStack(alignment: .leading, spacing: 4) {
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/nothingsh/DeclarativeAppKit.git", from: "0.1.0")
+    .package(url: "https://github.com/nothingsh/DeclarativeAppKit.git", from: "0.2.0")
 ]
 ```
 

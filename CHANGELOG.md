@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-14
+
 ### Added
 
 - `spacing(_:after:)` on stacks and scroll views, for a different distance after one element.
@@ -25,5 +27,6 @@ All notable changes to this project are documented here. The format follows
 
 First release.
 
-[Unreleased]: https://github.com/nothingsh/DeclarativeAppKit/compare/0.1.0...HEAD
+[Unreleased]: https://github.com/nothingsh/DeclarativeAppKit/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/nothingsh/DeclarativeAppKit/compare/0.1.0...0.2.0
 [0.1.0]: https://github.com/nothingsh/DeclarativeAppKit/releases/tag/0.1.0
